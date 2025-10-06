@@ -18,7 +18,6 @@ jobs:
         uses: chickensoft-games/setup-godot@v1
         with:
           version: 4.6
-          include-standard: true
           include-templates: true
 
       - name: Validate GDScript format
