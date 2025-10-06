@@ -3,6 +3,8 @@
 android/
 bin/
 build/
+extern/
 *.import/
 *.scons_cache
+tools/godot/bin/
 user://

@@ -13,7 +13,6 @@
   ```
 - ブランチ戦略: `main`（安定） + `develop`（最新） + `feature/*`。Pull Request ベースで運用。
 
-## 2. Godot ソースビルド
 _GDExtension を利用するため公式バイナリではなくソースビルドを使用する。_
 
 1. Godot ソース取得（最新安定版タグを使用）
@@ -21,7 +20,7 @@ _GDExtension を利用するため公式バイナリではなくソースビル�
    git clone https://github.com/godotengine/godot.git godot-source
    Set-Location godot-source
    git fetch --tags
-   $env:GODOT_TAG = "4.5-stable"     # 例: 最新安定版タグ。新リリース時は更新
+   $env:GODOT_TAG = "4.6-stable"     # 例: 最新安定版タグ。新リリース時は更新
    git checkout $env:GODOT_TAG
    ```
 2. 依存関係インストール（Windows 例）
@@ -45,10 +44,10 @@ _GDExtension を利用するため公式バイナリではなくソースビル�
   git submodule add https://github.com/godotengine/godot-cpp.git extern/godot-cpp
   Set-Location extern/godot-cpp
   git fetch --tags
-  $env:GODOTCPP_TAG = $env:GODOT_TAG    # Godot 本体と同じタグに合わせる（例: 4.5-stable）
+  $env:GODOTCPP_TAG = $env:GODOT_TAG    # Godot 本体と同じタグに合わせる（例: 4.6-stable）
   git checkout $env:GODOTCPP_TAG
-  scons platform=windows target=release
-  scons platform=windows target=debug
+  scons platform=windows target=template_release
+  scons platform=windows target=template_debug
   ```
 - `extern/` 配下にビルド生成物を配置し、`build/` は `.gitignore` 済みか確認。
 
