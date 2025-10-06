@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/main/MainRoot.gd" id="1_0vloh"]
+
+[node name="MainRoot" type="Node3D"]
+script = ExtResource("1_0vloh")
+world_root = NodePath("WorldRoot")
+
+[node name="WorldRoot" type="Node3D" parent="."]

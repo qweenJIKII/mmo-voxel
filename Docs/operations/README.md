@@ -1,7 +1,7 @@
 # 開発・運用ガイドアウトライン
 
 ## 1. 環境構成
-- ローカル開発: Windows 11 / Ubuntu 24.04 をサポート対象とし、Godot 4.3 安定版を標準化。`project.godot` の差分設定は `.godot/` 以下で管理。
+- ローカル開発: Windows 11 / Ubuntu 24.04 をサポート対象とし、Godot 4.6 安定版を標準化。`project.godot` の差分設定は `.godot/` 以下で管理。
 - 依存ツール: `Python 3.11`（ツールスクリプト用）、`Node.js 20`（Web ダッシュボード用）等のバージョンを `operations/requirements.md` に明記する予定。
 - コンテナ検証: `docker compose -f ops/docker-compose.server.yml up` で専用サーバ（headless Godot + SQLite）を起動できるよう設計。Podman 互換も確認。
 

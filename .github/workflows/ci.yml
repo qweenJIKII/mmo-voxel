@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.6
+          include-standard: true
+          include-templates: true
+
+      - name: Validate GDScript format
+        run: |
+          godot --headless --path . --check-only
+
+      - name: Export Windows build
+        run: |
+          pwsh ./operations/scripts/build.ps1 -Target windows -GodotPath godot
+
+      - name: Export server build
+        run: |
+          pwsh ./operations/scripts/build.ps1 -Target server -GodotPath godot
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/windows
+
+      - name: Upload server artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-build
+          path: build/server

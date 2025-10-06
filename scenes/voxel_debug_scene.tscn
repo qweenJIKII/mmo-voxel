@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://dm53ixjmp734l"]
+
+[ext_resource type="Script" uid="uid://bgj3vtj37nis0" path="res://scripts/voxel/AdaptiveVoxelSubsystem.gd" id="1"]
+[ext_resource type="Script" uid="uid://bbcjvttmxgevo" path="res://scripts/debug/VoxelDebugDrawer.gd" id="2"]
+[ext_resource type="Script" uid="uid://bvj5vnjg2ql61" path="res://scripts/voxel/VoxelMeshStreamer.gd" id="3"]
+[ext_resource type="Script" uid="uid://ddwqyeej8b2aa" path="res://scripts/voxel/TestPlayerController.gd" id="4"]
+
+[sub_resource type="BoxMesh" id="CubeMesh1"]
+
+[node name="VoxelDebugRoot" type="Node3D"]
+
+[node name="AdaptiveVoxelSubsystem" type="Node3D" parent="."]
+script = ExtResource("1")
+
+[node name="VoxelDebugDrawer" type="Node3D" parent="."]
+script = ExtResource("2")
+subsystem_path = NodePath("../AdaptiveVoxelSubsystem")
+
+[node name="VoxelMeshStreamer" type="Node3D" parent="."]
+script = ExtResource("3")
+subsystem_path = NodePath("../AdaptiveVoxelSubsystem")
+mesh_color = Color(0.6862745, 0.7254902, 0.8784314, 0)
+
+[node name="TestPlayer" type="Node3D" parent="."]
+script = ExtResource("4")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestPlayer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CubeMesh1")
+
+[node name="Camera3D" type="Camera3D" parent="TestPlayer"]
+transform = Transform3D(1, 0, 0, 0, 0.86602527, 0.50000024, 0, -0.50000024, 0.86602527, 0, 5, 10)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.7071069, 0.70710665, 0, -0.70710665, 0.7071069, 0, 0, 0)

@@ -1,0 +1,10 @@
+{
+  "network": {
+    "host": "127.0.0.1",
+    "port": 4242
+  },
+  "logging": {
+    "enable_jsonl": true,
+    "log_level": "info"
+  }
+}

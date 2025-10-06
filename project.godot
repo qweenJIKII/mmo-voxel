@@ -11,10 +11,13 @@ config_version=5
 [application]
 
 config/name="MMO_Voxel"
+run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
-
 [autoload]
-GameState="*res://autoload/GameState.gd"
 
+ConfigService="*res://autoload/ConfigService.gd"
+Logger="*res://autoload/Logger.gd"
+NetworkClient="*res://autoload/NetworkClient.gd"
+GameState="*res://autoload/GameState.gd"

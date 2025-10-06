@@ -16,24 +16,35 @@
 - **同期層**: `res://scripts/network/VoxelReplication.gd` が差分レプリケーションを行い、ENet ベースでチャンク更新を配信。MVCC/OCC モデルを Godot RPC へ適用。
 - **UIレイヤ**: `res://ui/debug/VoxelDebugOverlay.tscn` で解像度/属性ヒートマップを可視化し、開発支援とゲーム内 HUD 表示を共通化。
 
+## 2.1 現状実装 (2025-10-06)
+- **AdaptiveVoxelTree.gd**: `refine_region()` / `derefine_region()` / `query_nodes()` / `get_nodes()` を含む GDScript スタブを実装。Octree ノード生成・削除と AABB クエリ、ボクセル値の保持を簡易ロジックで提供中。
+- **AdaptiveVoxelSubsystem.gd**: プレイヤー興味領域を算出し `AdaptiveVoxelTree` に `refine_region()` / `prune_outside()` を指示する処理を実装。`get_debug_nodes()` / `get_debug_nodes_with_meta()` でデバッグ出力を提供。
+- **VoxelDebugDrawer.gd**: `get_debug_nodes()` から取得した `AABB` を `ImmediateMesh` でライン描画し、Octree ノードの可視化をサポート。
+- **VoxelMeshStreamer.gd**: `get_debug_nodes_with_meta()` を用いて `MultiMeshInstance3D` にノード境界を可視化。LOD メッシュ生成は未実装だがデバッグプレビューとして動作。
+- **シーン構成**: `res://scenes/voxel_debug_scene.tscn` で `AdaptiveVoxelSubsystem`, `VoxelDebugDrawer`, `VoxelMeshStreamer` を組み合わせ、`players` グループのノード移動に追従してノード生成を確認できる PoC を構築。
+
 ## 3. 実装フェーズ
 
 ### Phase A: 基盤 PoC（4 週間）
-- **タスクA1**: `AdaptiveVoxelTree` GDExtension のスケルトン実装（ノード確保/解放、AABB クエリ）。
-- **タスクA2**: `AdaptiveVoxelSubsystem.gd` の雛形作成。プレイヤー興味領域を八分木座標へマッピング。
-- **タスクA3**: デバッグ描画（`res://scripts/debug/VoxelDebugDrawer.gd`）で Octree ノードをライン表示。PIE モードで状態確認。
+- **タスクA1**: `AdaptiveVoxelTree` GDExtension のスケルトン実装（ノード確保/解放、AABB クエリ）。 _[進捗: GDScript スタブ実装済み。GDExtension 未着手]_ 
+- **タスクA2**: `AdaptiveVoxelSubsystem.gd` の雛形作成。プレイヤー興味領域を八分木座標へマッピング。 _[進捗: GDScript 実装済み]_ 
+- **タスクA3**: デバッグ描画（`res://scripts/debug/VoxelDebugDrawer.gd`）で Octree ノードをライン表示。PIE モードで状態確認。 _[進捗: GDScript 実装済み]_ 
+- **補足 (2025-10-06)**:
+  - `AdaptiveVoxelTree.gd` に簡易 Octree ノード生成・問合せを実装済み（GDExtension 差し替え前のスタブ）。
+  - `res://scenes/voxel_debug_scene.tscn` で `AdaptiveVoxelSubsystem` + `VoxelDebugDrawer` + `VoxelMeshStreamer` をセットアップ。プレイヤー (`players` グループ) を移動してノード生成を可視化。
+  - `VoxelMeshStreamer.gd` は Phase B の `VoxelMeshStreamer` 実装に向けた MultiMesh ベースの足場。現在は `AdaptiveVoxelTree.query_nodes()` の結果をスケール表示。
 - **成果物**: Godot エディタ上で Octree を生成・視覚化できる PoC。ボクセル編集インターフェース（`set_voxel`, `clear_voxel`）。
-
 ### Phase B: レンダリング & ストリーミング（5 週間）
-- **タスクB1**: `VoxelMeshStreamer` 実装。チャンク単位でメッシュを生成し、距離に応じて LOD を切り替え。
-- **タスクB2**: `architecture/world-streaming.md`（新規）に従い、プレイヤー周囲チャンクの Prefetch/Unload を制御。
-- **タスクB3**: `AdaptiveVoxelSubsystem` に動的 Refine/Derefine ロジックを導入。プレイヤー行動/イベントで解像度を変更。
+- **タスクB1**: `VoxelMeshStreamer` 実装。チャンク単位でメッシュを生成し、距離に応じて LOD を切り替え。 _[進捗: GDScript デバッグ表示実装済み。LOD メッシュ生成・差分更新は未着手]_ 
+- **タスクB2**: `architecture/world-streaming.md`（新規）に従い、プレイヤー周囲チャンクの Prefetch/Unload を制御。 _[進捗: 未着手]_ 
+- **タスクB3**: `AdaptiveVoxelSubsystem` に動的 Refine/Derefine ロジックを導入。プレイヤー行動/イベントで解像度を変更。 _[進捗: GDScript 内でプレイヤー周辺の refine/prune を実装、イベント連携は未着手]_ 
+- **タスクB4**: プレイヤーモデルの可視化。`TestPlayer` に暫定メッシュを割り当て、将来的なキャラクタースキン/アニメーション導入の土台とする。 _[進捗: 未着手]_ 
 - **成果物**: シームレスなチャンク読み込みと LOD メッシュ表示。GPU/CPU パフォーマンス計測レポート。
 
 ### Phase C: 属性シミュレーション（6 週間）
-- **タスクC1**: `AdaptiveVoxelSolver` で温度/穢れ/マナの属性格納フォーマットを実装。CPU ベースの時間積分ループを構築。
-- **タスクC2**: 属性更新／クエリ API (`get_attribute_field`, `apply_attribute_impulse`) を `AdaptiveVoxelSubsystem` へ追加。
-- **タスクC3**: `res://scripts/ai/VoxelSense.gd` で AI から属性フィールドを参照。イベント（爆発、魔法）入力を `AdaptiveVoxelEventRouter.gd` で処理。
+- **タスクC1**: `AdaptiveVoxelSolver` で温度/穢れ/マナの属性格納フォーマットを実装。CPU ベースの時間積分ループを構築。 _[進捗: 未着手]_ 
+- **タスクC2**: 属性更新／クエリ API (`get_attribute_field`, `apply_attribute_impulse`) を `AdaptiveVoxelSubsystem` へ追加。 _[進捗: 未着手]_ 
+- **タスクC3**: `res://scripts/ai/VoxelSense.gd` で AI から属性フィールドを参照。イベント（爆発、魔法）入力を `AdaptiveVoxelEventRouter.gd` で処理。 _[進捗: 未着手]_ 
 - **成果物**: 属性ヒートマップの HUD 表示、属性更新ログ、自動テスト（属性維持/減衰）。
 
 ### Phase D: ネットワーク & 経済連携（6 週間）

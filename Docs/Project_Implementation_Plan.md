@@ -4,9 +4,9 @@
 担当: TODO
 
 ## 1. 現状サマリ
-- Godot プロジェクト `g:/Godot/mmo-voxel` はアーキテクチャ/ゲームプレイ/UI/運用の設計段階。コード側の実装は未着手。
-- 既存ドキュメントは方針・設計概要のみ。実装進捗は 0% を前提にロードマップを策定する。
-- Unreal 時代の設計資料は `Docs/archive/legacy_unreal/` に保管。必要に応じて Godot 向けへ移植する。
+- Godot プロジェクト `g:/Godot/mmo-voxel` は Phase 0（基盤整備）を開始済み。`res://scenes/main.tscn`、`ConfigService.gd`、`Logger.gd`、`NetworkClient.gd`、`GameState.gd` を実装し、JSONL ログ生成を確認した。
+- ビルド/CI、ネットワーク PoC など Phase 0 中の残タスクは未着手。以降の Phase 1〜4 は計画段階。
+- Unreal 時代の設計資料は `Docs/archive/legacy_unreal/` に保管。`Gameplay_Feature_Status.md` を Godot 移植計画へ再編済み。
 
 ## 2. 実装フェーズ全体像
 | フェーズ | 期間目安 | 目的 | 主な完了判定 |
@@ -20,10 +20,10 @@
 ## 3. フェーズ別タスク詳細
 
 ### Phase 0: 基盤整備
-- **プロジェクト構成** `architecture/README.md` に基づき、`res://scenes/main.tscn`, AutoLoad シングルトン (`GameState`, `NetworkClient`, `ConfigService`) の空実装を作成。
-- **ビルド環境** `operations/README.md` を参照し、Godot 4.3 環境設定、CLI ビルドスクリプト、GitHub Actions 雛形を作成。
-- **ログ/設定** `Logger.gd`, `ConfigService.gd` の最小実装を追加し、JSONL ログ出力ができることを確認。
-- **成果物**: 基礎シーン、オートロード登録、CI Workflow テンプレート、ローカル実行手順書。
+- **プロジェクト構成** `architecture/README.md` に基づき、`res://scenes/main.tscn`, AutoLoad シングルトン (`GameState`, `NetworkClient`, `ConfigService`, `Logger`) を実装済み。`MainRoot.gd` で設定適用とログ出力を確認。 _[完了]_ 
+- **ビルド環境** `operations/README.md` を参照し、Godot 4.x 環境設定、CLI ビルドスクリプト、GitHub Actions 雛形を作成。 _[未着手]_ 
+- **ログ/設定** `Logger.gd`, `ConfigService.gd` を導入し、`user://logs/` への JSONL 出力を検証済み。 _[完了]_ 
+- **成果物**: 基礎シーン、オートロード登録、初期ログ基盤、CI/ビルド手順書（作成予定）。
 
 ### Phase 1: ネットワーク & データ
 - **通信基礎** `architecture/README.md` のサーバ構成に従い `NetworkClient.gd` と `ServerState.gd` のスケルトンを実装。ENet を利用したログイン/位置同期 RPC の PoC を作成。
@@ -35,18 +35,21 @@
 - **ワールド生成** `gameplay/README.md` のワールド構成と `architecture/world-streaming.md (予定)` を参照し、`WorldRoot` にチャンク管理マネージャを実装。`32x32x32` チャンクを距離ベースでストリーミング。
 - **探索体験** オープンワールド探索仕様に合わせ、ランドマーク/資源帯のプレースホルダ（シグナル通知のみ）を実装。
 - **UI/HUD 基礎** `ui/README.md` の方針に従い、HUD にコンパス・ミニマップモックを追加し、探索イベントを通知。
+- **ボクセルシステム計画連携** `Docs/architecture/voxel_system_plan.md` の Phase A/B を Phase 2 期間中に実施。`AdaptiveVoxelTree`/`AdaptiveVoxelSubsystem` の PoC 完了後、`VoxelMeshStreamer` とチャンク LOD 制御を同フェーズ内で構築。
 - **成果物**: クライアントがシームレスに移動しながらチャンク読み込みが行えること、ランドマーク発見ログの記録。
 
 ### Phase 3: ゲームプレイ & 経済
 - **採掘/クラフト** `gameplay/README.md` の生活コンテンツ仕様を基に `mining_tool.gd`、`crafting_station.gd` を実装。サーバ側で採掘結果を確定し、インベントリへ反映。
 - **クエスト/イベント** 探索型クエストを実装。ランドマーク発見・任意イベントへの参加記録を `analytics/player_activity.jsonl` に出力。
 - **経済/取引 UI** `ui/README.md` の主要ウィジェット構成を参照し、マーケット UI (`ui/trade_market.tscn`) と取引 RPC を実装。`Shard`, `Aetherium`, `GuildMark` の CRUD をサーバ側に用意。
+- **ボクセルシステム計画連携** `Docs/architecture/voxel_system_plan.md` の Phase C を Phase 3 冒頭で着手し、属性シミュレーション API と `VoxelSense` 連携を完了させた上でゲームプレイ機能と統合。
 - **成果物**: 探索→採掘→クラフト→取引までのフローが動作し、経済データがサーバ永続化される。
 
 ### Phase 4: 運用拡張
 - **モニタリング強化** Grafana/Loki 連携、Discord 通知、アラート閾値設定を実装し運用手順を `operations/local_testing.md` と合わせて整備。
 - **自動テスト** Godot Integration Test によるフル E2E（ボクセル破壊、同期、取引）を追加。テスト結果を CI に統合。
 - **コンテンツ拡張** バイオーム追加、ペットシステム、季節イベントを段階的に実装し、ドキュメントの更新履歴を管理。
+- **ボクセルシステム計画連携** `Docs/architecture/voxel_system_plan.md` の Phase D/E を Phase 4 へ統合し、ネットワーク差分同期と運用ツール群を継続的に整備。
 
 ## 4. タスク/ドキュメント連携
 - `architecture/README.md`: クライアント/サーバ構成、永続化、観測性 → Phase 0-2 の指針。
